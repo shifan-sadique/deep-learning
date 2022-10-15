@@ -1,0 +1,21 @@
+import tensorflow as tf
+from tensorflow import keras
+#1.Train-
+#load data set
+from sklearn.datasets import load_iris
+iris=load_iris()
+x=iris.data
+y=iris.target
+from sklearn.model_selection import train_test_split
+xtrain,xtest,ytrain,ytest=train_test_split(x,y,test_size=0.7)
+#create model
+ml=keras.models.Sequential()
+#creating input and hidden layer together
+ml.add(keras.layers.Dense(units=5,activation="relu",input_shape=xtrain.shape[1:]))
+ml.add(keras.layers.Dense(units=5,activation="sigmoid"))
+ml.summary()
+#compile
+ml.compile(loss="categorical_crossentropy",optimizer="adam",metrics=["accuracy"])
+#fit
+ml.fit(xtrain,ytrain,epochs=50)
+test_loss,test_accuracy=ml.evaluate(xtest,ytest)
