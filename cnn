@@ -1,0 +1,52 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import tensorflow as tf
+from tensorflow import keras
+
+mnistDb= keras.datasets.mnist
+(xtrain,ytrain),(xtest,ytest)=mnistDb.load_data()
+
+
+print("xtrain : ",xtrain.shape)
+print("ytrain", ytrain.shape)
+print("xtest", xtest.shape)
+print("ytest", ytest.shape)
+
+
+xtrain=xtrain.reshape((60000,28,28,1))
+xtest=xtest.reshape((10000,28,28,1))
+
+xtrain=xtrain.astype("float32")/255
+xtest=xtest.astype("float32")/255
+
+print("xtrain shape ",xtrain.shape)
+print("xtest shape ",xtest.shape)
+
+cnnModel_MNIST=keras.models.Sequential()
+
+
+cnnModel_MNIST.add(keras.layers.Conv2D(32,(3,3),activation="relu",input_shape=xtrain.shape[1:]))
+
+cnnModel_MNIST.add(keras.layers.Conv2D(64,(3,3),activation="relu"))
+
+cnnModel_MNIST.add(keras.layers.MaxPooling2D((2,2)))
+
+cnnModel_MNIST.add(keras.layers.Dropout(0.25))
+
+cnnModel_MNIST.add(keras.layers.Flatten())
+
+cnnModel_MNIST.add(keras.layers.Dense(128,activation="relu"))
+
+cnnModel_MNIST.add(keras.layers.Dropout(0.25))
+
+cnnModel_MNIST.add(keras.layers.Dense(10,activation="softmax"))
+
+cnnModel_MNIST.summary()
+
+from tensorflow.python import metrics
+cnnModel_MNIST.compile(loss="sparse_categorical_crossentropy",optimizer="adam",metrics=["accuracy"])
+
+cnnModel_MNIST.fit(xtrain,ytrain,epochs=1,batch_size=16)
+
+test_loss,test_accuracy=cnnModel_MNIST.evaluate(xtest,ytest)
