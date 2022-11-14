@@ -1,0 +1,58 @@
+import numpy
+import matplotlib.pyplot as plt
+import pandas
+import math
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.layers import LSTM
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.metrics import mean_squared_error
+
+dataframe=pandas.read_csv("hour.csv")
+dataset=dataframe[["Hourly"]]
+dataset=dataset.astype("float32")
+
+scaler=MinMaxScaler(feature_range=(0,1))
+dataset=scaler.fit_transform(dataset)
+
+trainsize=int(len(dataset)*0.7)
+testsize=len(dataset)-trainsize
+
+train,test=dataset[0:trainsize], dataset[trainsize:len(dataset)]
+print(len(train),len(test))
+
+def create_dataset(dataset):
+  dataX, dataY = [], []
+  for i in range(len(dataset)-1):
+    a = dataset[i]
+    dataX.append(a)
+    dataY.append(dataset[i + 1])
+  return numpy.array(dataX), numpy.array(dataY)
+
+trainx,trainy=create_dataset(train)
+testx,testy=create_dataset(test)
+
+print(trainx.shape)
+print(testx.shape)
+print(trainy.shape)
+print(testy.shape)
+
+trainx = numpy.reshape(trainx, (trainx.shape[0], 1, 1))
+testx= numpy.reshape(testx, (testx.shape[0], 1, 1))
+
+
+model = Sequential()
+model.add(LSTM(4, input_shape=(1, 1)))
+model.add(Dense(1))
+model.compile(loss='mean_squared_error',metrics = ['accuracy'], optimizer='adam')
+model.fit(trainx, trainy, epochs=100, batch_size=1,validation_data=(testx,testy),verbose=2)
+
+
+testPredict = model.predict(testx)
+testPredict = scaler.inverse_transform(testPredict)
+testy2 = scaler.inverse_transform(testy)
+
+
+
+plt.plot(testPredict)
+plt.plot(testy2)
